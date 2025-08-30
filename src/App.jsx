@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ConverterScreen from './components/ConverterScreen.jsx'
 import ConfirmationScreen from './components/ConfirmationScreen.jsx'
+import QuoteDetailsScreen from './components/QuoteDetailsScreen.jsx'
 import './App.css'
 
 function App() {
@@ -9,7 +10,7 @@ function App() {
 
   const handleConversionSuccess = (data) => {
     setTransactionData(data)
-    setCurrentScreen('confirmation')
+    setCurrentScreen('quoteDetails')
   }
 
   const handleBackToConverter = () => {
@@ -17,10 +18,22 @@ function App() {
     setTransactionData(null)
   }
 
+  const handleProceedToConfirmation = () => {
+    setCurrentScreen('confirmation')
+  }
+
   return (
     <div className="App">
       {currentScreen === 'converter' && (
         <ConverterScreen onSuccess={handleConversionSuccess} />
+      )}
+      
+      {currentScreen === 'quoteDetails' && (
+        <QuoteDetailsScreen 
+          transactionData={transactionData}
+          onBack={handleBackToConverter}
+          onProceed={handleProceedToConfirmation}
+        />
       )}
       
       {currentScreen === 'confirmation' && (

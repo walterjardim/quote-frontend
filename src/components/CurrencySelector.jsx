@@ -11,7 +11,8 @@ export default function CurrencySelector({
   value,
   onValueChange,
   placeholder = "Selecionar moeda...",
-  className = ""
+  className = "",
+  disabled = false
 }) {
   const [open, setOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
@@ -47,15 +48,20 @@ export default function CurrencySelector({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          disabled={disabled}
           className={cn(
-            "w-full justify-between bg-white hover:bg-gray-50",
+            "w-full justify-between",
+            "bg-secondary/50 hover:bg-secondary/70 border-border",
+            "text-foreground hover:text-foreground",
+            disabled && "opacity-50 cursor-not-allowed",
             className
           )}
         >
           {selectedCurrency ? (
             <div className="flex items-center gap-2">
               <div className={cn(
-                "w-4 h-4 rounded-full flex items-center justify-center text-xs text-white",
+                "w-4 h-4 rounded-full flex items-center justify-center text-xs",
+                selectedCurrency.category === 'fiat' ? "text-black" : "text-white",
                 selectedCurrency.color || "bg-gray-500"
               )}>
                 {selectedCurrency.category === 'fiat' ?
@@ -63,7 +69,7 @@ export default function CurrencySelector({
                   selectedCurrency.icon
                 }
               </div>
-              <span className="font-medium">
+              <span className="font-medium text-foreground">
                 {selectedCurrency.category === 'fiat' ?
                   selectedCurrency.code :
                   selectedCurrency.name
@@ -78,32 +84,34 @@ export default function CurrencySelector({
           ) : (
             <span className="text-muted-foreground">{placeholder}</span>
           )}
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
-        <Command>
-          <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      <PopoverContent className="w-80 p-0 bg-popover border-border" align="start">
+        <Command className="bg-popover">
+          <div className="flex items-center border-b border-border px-3">
+            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50 text-muted-foreground" />
             <Input
               placeholder="Procurar Moedas"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <CommandList className="max-h-80">
-            <CommandEmpty>Nenhuma moeda encontrada.</CommandEmpty>
+            <CommandEmpty className="text-muted-foreground py-6 text-center text-sm">
+              Nenhuma moeda encontrada.
+            </CommandEmpty>
 
             {/* Categoria Fiat */}
             {filteredFiatCurrencies.length > 0 && (
-              <CommandGroup heading="Fiat">
+              <CommandGroup heading="Fiat" className="text-muted-foreground">
                 {filteredFiatCurrencies.map((currency) => (
                   <CommandItem
                     key={currency.code}
                     value={currency.code}
                     onSelect={() => handleSelect(currency.code)}
-                    className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-50"
+                    className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground text-foreground"
                   >
                     <div className={cn(
                       "w-5 h-5 rounded-full flex items-center justify-center text-sm",
@@ -113,14 +121,14 @@ export default function CurrencySelector({
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{currency.code}</span>
-                        <span className="text-gray-500 text-sm">|</span>
-                        <span className="text-gray-600 text-sm">{currency.name}</span>
+                        <span className="font-medium text-sm text-foreground">{currency.code}</span>
+                        <span className="text-muted-foreground text-sm">|</span>
+                        <span className="text-muted-foreground text-sm">{currency.name}</span>
                       </div>
                     </div>
                     <Check
                       className={cn(
-                        "ml-auto h-4 w-4",
+                        "ml-auto h-4 w-4 text-primary",
                         value === currency.code ? "opacity-100" : "opacity-0"
                       )}
                     />
@@ -131,13 +139,13 @@ export default function CurrencySelector({
 
             {/* Categoria Crypto */}
             {filteredCryptoCurrencies.length > 0 && (
-              <CommandGroup heading="Crypto">
+              <CommandGroup heading="Crypto" className="text-muted-foreground">
                 {filteredCryptoCurrencies.map((currency) => (
                   <CommandItem
                     key={currency.code}
                     value={currency.code}
                     onSelect={() => handleSelect(currency.code)}
-                    className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-50"
+                    className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground text-foreground"
                   >
                     <div className={cn(
                       "w-5 h-5 rounded-full flex items-center justify-center text-sm text-white",
@@ -147,14 +155,14 @@ export default function CurrencySelector({
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{currency.name}</span>
-                        <span className="text-gray-500 text-sm">|</span>
-                        <span className="text-gray-600 text-sm">{currency.description}</span>
+                        <span className="font-medium text-sm text-foreground">{currency.name}</span>
+                        <span className="text-muted-foreground text-sm">|</span>
+                        <span className="text-muted-foreground text-sm">{currency.description}</span>
                       </div>
                     </div>
                     <Check
                       className={cn(
-                        "ml-auto h-4 w-4",
+                        "ml-auto h-4 w-4 text-primary",
                         value === currency.code ? "opacity-100" : "opacity-0"
                       )}
                     />
@@ -168,3 +176,4 @@ export default function CurrencySelector({
     </Popover>
   )
 }
+

@@ -1,9 +1,12 @@
-// Configuração da API - fácil de alterar no futuro
-const API_CONFIG = {
-  baseUrl: 'https://api.opendoors.xyz/v1', // 'https://api.opendoors.xyz/v1', https://ec2-18-117-74-223.us-east-2.compute.amazonaws.com
+import { API_CONFIG, FALLBACK_CONFIG, debugLog, errorLog, warnLog } from '../config/environment.js'
+
+// Configuração da API usando variáveis de ambiente
+const API_SETTINGS = {
+  baseUrl: API_CONFIG.baseUrl,
   endpoints: {
-    quote: '/quotes'
-  }
+    quote: API_CONFIG.quoteEndpoint
+  },
+  timeout: API_CONFIG.timeout
 }
 
 // Taxas simuladas para fallback (valores aproximados para demonstração)
@@ -101,17 +104,20 @@ const normalizeCurrencyCode = (code) => {
 
 /**
  * Serviço para obter cotação de conversão de moedas
- * @param {number} amount - Valor a ser convertido
- * @param {string} from - Moeda de origem
- * @param {string} to - Moeda de destino
+ * @param {Object} requestBody - Dados da requisição
  * @returns {Promise<Object>} Resposta da API com a cotação
  */
 export const getQuote = async (requestBody) => {
   try {
-    const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.quote}`
+    const url = `${API_SETTINGS.baseUrl}${API_SETTINGS.endpoints.quote}`
 
-    console.log('Enviando requisição para:', url)
-    console.log('Dados da requisição:', requestBody)
+    console.log('url = ', url);
+
+    debugLog('Enviando requisição para:', url)
+    debugLog('Dados da requisição:', requestBody)
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), API_SETTINGS.timeout)
 
     const response = await fetch(url, {
       method: 'POST',
@@ -119,13 +125,16 @@ export const getQuote = async (requestBody) => {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
+      signal: controller.signal
     })
+
+    clearTimeout(timeoutId)
 
     const quote = await response.json()
 
-    console.log('Status da resposta:', response.status)
-    console.log('Resposta completa da API:', quote)
+    debugLog('Status da resposta:', response.status)
+    debugLog('Resposta completa da API:', quote)
 
     if (!response.ok) {
       throw new Error(`Erro na API: ${response.status}`)
@@ -134,7 +143,13 @@ export const getQuote = async (requestBody) => {
     return quote;
 
   } catch (error) {
-    console.error('Erro na requisição da API:', error)
+    errorLog('Erro na requisição da API:', error)
+
+    // Se o fallback estiver habilitado, pode implementar lógica de fallback aqui
+    if (FALLBACK_CONFIG.enabled) {
+      warnLog('API indisponível, considere implementar fallback')
+    }
+
     throw new Error(error);
   }
 }
@@ -144,8 +159,8 @@ export const getQuote = async (requestBody) => {
  * @param {Object} newConfig - Nova configuração
  */
 export const updateApiConfig = (newConfig) => {
-  Object.assign(API_CONFIG, newConfig)
-  console.log('Configuração da API atualizada:', API_CONFIG)
+  Object.assign(API_SETTINGS, newConfig)
+  debugLog('Configuração da API atualizada:', API_SETTINGS)
 }
 
 /**
@@ -153,7 +168,7 @@ export const updateApiConfig = (newConfig) => {
  * @returns {Object} Configuração atual
  */
 export const getApiConfig = () => {
-  return { ...API_CONFIG }
+  return { ...API_SETTINGS }
 }
 
 /**
@@ -173,7 +188,7 @@ export const getSimulatedRates = () => {
 export const updateSimulatedRate = (from, to, rate) => {
   const rateKey = `${from}_${to}`
   SIMULATED_RATES[rateKey] = rate
-  console.log(`Taxa simulada atualizada: ${rateKey} = ${rate}`)
+  debugLog(`Taxa simulada atualizada: ${rateKey} = ${rate}`)
 }
 
 export default {
