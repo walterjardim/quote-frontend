@@ -1,6 +1,6 @@
 // Configuração da API - fácil de alterar no futuro
 const API_CONFIG = {
-  baseUrl: 'http://localhost:8090/v1', // 'https://api.opendoors.xyz/v1', https://ec2-18-117-74-223.us-east-2.compute.amazonaws.com
+  baseUrl: 'https://api.opendoors.xyz/v1', // 'https://api.opendoors.xyz/v1', https://ec2-18-117-74-223.us-east-2.compute.amazonaws.com
   endpoints: {
     quote: '/quotes'
   }
