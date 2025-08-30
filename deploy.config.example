@@ -1,0 +1,44 @@
+# Configuração de Deploy - Conversor USDT para BRL
+# Copie este arquivo para deploy.config e edite conforme necessário
+
+# Nome do bucket S3 (deve ser único globalmente)
+BUCKET_NAME="usdt-brl-converter-[seu-nome-aqui]"
+
+# Região AWS (escolha a mais próxima dos usuários)
+# Opções comuns:
+# - sa-east-1 (São Paulo, Brasil)
+# - us-east-1 (N. Virginia, EUA) - mais barato
+# - eu-west-1 (Irlanda, Europa)
+AWS_REGION="sa-east-1"
+
+# ID da distribuição CloudFront (opcional)
+# Deixe vazio se não usar CloudFront
+# Exemplo: E1234567890ABC
+CLOUDFRONT_DISTRIBUTION_ID=""
+
+# Configurações adicionais (avançado)
+# Perfil AWS CLI (se usar múltiplos perfis)
+AWS_PROFILE="default"
+
+# Tags para recursos AWS (opcional)
+PROJECT_TAG="USDT-Converter"
+ENVIRONMENT_TAG="production"
+
+# Configurações de cache (CloudFront)
+CACHE_TTL="86400"  # 24 horas em segundos
+
+# Configurações de compressão
+ENABLE_GZIP="true"
+
+# Configurações de segurança
+ENABLE_HTTPS_REDIRECT="true"
+ENABLE_HSTS="true"
+
+# Notificações (opcional)
+# SLACK_WEBHOOK_URL=""
+# EMAIL_NOTIFICATION=""
+
+# Backup (opcional)
+ENABLE_BACKUP="false"
+BACKUP_BUCKET=""
+
