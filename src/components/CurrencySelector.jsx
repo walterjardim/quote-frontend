@@ -5,19 +5,19 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command.jsx'
 import { Check, ChevronDown, Search } from 'lucide-react'
 import { cn } from '@/lib/utils.js'
-import { CURRENCIES, getCurrencyDisplayName, getCurrencyIcon } from '../data/currencies.js'
+import { CURRENCIES } from '../data/currencies.js'
 
-export default function CurrencySelector({ 
-  value, 
-  onValueChange, 
+export default function CurrencySelector({
+  value,
+  onValueChange,
   placeholder = "Selecionar moeda...",
-  className = "" 
+  className = ""
 }) {
   const [open, setOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
 
-  const selectedCurrency = value ? 
-    [...CURRENCIES.fiat, ...CURRENCIES.crypto].find(currency => currency.code === value) : 
+  const selectedCurrency = value ?
+    [...CURRENCIES.fiat, ...CURRENCIES.crypto].find(currency => currency.code === value) :
     null
 
   const filteredFiatCurrencies = CURRENCIES.fiat.filter(currency =>
@@ -34,6 +34,7 @@ export default function CurrencySelector({
   )
 
   const handleSelect = (currencyCode) => {
+    console.log('selectedCurrency = ', selectedCurrency);
     onValueChange(currencyCode)
     setOpen(false)
     setSearchValue("")
@@ -57,14 +58,14 @@ export default function CurrencySelector({
                 "w-4 h-4 rounded-full flex items-center justify-center text-xs text-white",
                 selectedCurrency.color || "bg-gray-500"
               )}>
-                {selectedCurrency.category === 'fiat' ? 
-                  selectedCurrency.flag : 
+                {selectedCurrency.category === 'fiat' ?
+                  selectedCurrency.flag :
                   selectedCurrency.icon
                 }
               </div>
               <span className="font-medium">
-                {selectedCurrency.category === 'fiat' ? 
-                  selectedCurrency.code : 
+                {selectedCurrency.category === 'fiat' ?
+                  selectedCurrency.code :
                   selectedCurrency.name
                 }
               </span>
@@ -85,7 +86,7 @@ export default function CurrencySelector({
           <div className="flex items-center border-b px-3">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <Input
-              placeholder="Search Currencies"
+              placeholder="Procurar Moedas"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -93,7 +94,7 @@ export default function CurrencySelector({
           </div>
           <CommandList className="max-h-80">
             <CommandEmpty>Nenhuma moeda encontrada.</CommandEmpty>
-            
+
             {/* Categoria Fiat */}
             {filteredFiatCurrencies.length > 0 && (
               <CommandGroup heading="Fiat">
@@ -167,4 +168,3 @@ export default function CurrencySelector({
     </Popover>
   )
 }
-

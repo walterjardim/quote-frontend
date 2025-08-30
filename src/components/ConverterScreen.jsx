@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input.jsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { ArrowUpDown } from 'lucide-react'
 import CurrencySelector from './CurrencySelector.jsx'
-import { DEFAULT_FROM_CURRENCY, DEFAULT_TO_CURRENCY, getCurrencyDisplayName } from '../data/currencies.js'
+import { DEFAULT_FROM_CURRENCY, DEFAULT_TO_CURRENCY, findCurrencyByCode } from '../data/currencies.js'
 
 export default function ConverterScreen({ onSuccess }) {
   const [sendAmount, setSendAmount] = useState('')
@@ -12,7 +12,6 @@ export default function ConverterScreen({ onSuccess }) {
   const [fromCurrency, setFromCurrency] = useState(DEFAULT_FROM_CURRENCY)
   const [toCurrency, setToCurrency] = useState(DEFAULT_TO_CURRENCY)
   const [isLoading, setIsLoading] = useState(false)
-  const [balance] = useState('0.000000')
 
   const handleConvert = async () => {
     if (!sendAmount || parseFloat(sendAmount) <= 0) {
@@ -36,16 +35,16 @@ export default function ConverterScreen({ onSuccess }) {
       // Importação dinâmica do serviço
       const { getQuote } = await import('../services/apiService.js')
 
-      const result = await getQuote(sendAmount, fromCurrency, toCurrency)
+      const requestBody = {
+        source: createQuoteSourceBasedBody(sendAmount, fromCurrency),
+        target: createQuoteSourceBasedBody(null, toCurrency),
+      }
 
-      if (result.amount) {
-        setReceiveAmount(result.amount.toString())
+      const result = await getQuote(requestBody)
 
-        if (result.fallback) {
-          console.log('Usando fallback - API indisponível')
-        } else {
-          console.log('Cotação obtida com sucesso da API')
-        }
+      if (result.id) {
+        setReceiveAmount(result.target.amount);
+        console.log('Cotação obtida com sucesso da API')
       } else {
         throw new Error('Resposta inválida da API')
       }
@@ -57,17 +56,22 @@ export default function ConverterScreen({ onSuccess }) {
     }
   }
 
-  const handleProceed = () => {
-    if (receiveAmount && parseFloat(receiveAmount) > 0) {
-      onSuccess({
-        sendAmount,
-        receiveAmount,
-        fromCurrency,
-        toCurrency,
-        fromCurrencyDisplay: getCurrencyDisplayName(fromCurrency),
-        toCurrencyDisplay: getCurrencyDisplayName(toCurrency)
-      })
+  const createQuoteSourceBasedBody = (sendAmount, currencyCode) => {
+    const currency = findCurrencyByCode(currencyCode);
+
+    const quoteBody = {
+      asset: currency.asset
     }
+
+    if (sendAmount) {
+      quoteBody.amount = sendAmount
+    }
+
+    if (currency.category == 'crypto') {
+      quoteBody.network = currency.network;
+    }
+
+    return quoteBody;
   }
 
   const handleSwapCurrencies = () => {
@@ -93,15 +97,8 @@ export default function ConverterScreen({ onSuccess }) {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium">
-                Send Amount <span className="text-red-500">*</span>
+                Quantidade a ser enviada <span className="text-red-500">*</span>
               </label>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Balance</span>
-                <span>{balance}</span>
-                <Button variant="outline" size="sm" className="h-6 px-2 text-xs">
-                  Max
-                </Button>
-              </div>
             </div>
             <div className="space-y-2">
               <Input
@@ -135,7 +132,7 @@ export default function ConverterScreen({ onSuccess }) {
           {/* Recipient Receives Section */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Recipient Receives <span className="text-red-500">*</span>
+              Destinatário Recebe <span className="text-red-500">*</span>
             </label>
             <div className="space-y-2">
               <Input
@@ -161,22 +158,6 @@ export default function ConverterScreen({ onSuccess }) {
           >
             {isLoading ? 'Convertendo...' : 'Converter'}
           </Button>
-
-          {/* Proceed Button */}
-          {receiveAmount && (
-            <Button
-              onClick={handleProceed}
-              className="w-full"
-              disabled={!receiveAmount || parseFloat(receiveAmount) <= 0}
-            >
-              Prosseguir com a Conversão
-            </Button>
-          )}
-
-          {/* Info Section */}
-          <div className="text-xs text-muted-foreground text-center">
-            <p>Taxa de câmbio sujeita a variações do mercado</p>
-          </div>
         </CardContent>
       </Card>
     </div>

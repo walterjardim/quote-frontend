@@ -1,8 +1,8 @@
 // Configuração da API - fácil de alterar no futuro
 const API_CONFIG = {
-  baseUrl: 'https://api.opendoors.xyz/v1',
+  baseUrl: 'http://localhost:8090/v1', // 'https://api.opendoors.xyz/v1', https://ec2-18-117-74-223.us-east-2.compute.amazonaws.com
   endpoints: {
-    quote: '/quote'
+    quote: '/quotes'
   }
 }
 
@@ -15,35 +15,35 @@ const SIMULATED_RATES = {
   'USDC_SOL_BRL': 5.82,
   'USDC_POL_BRL': 5.81,
   'USDC_BASE_BRL': 5.83,
-  
+
   'USDT_ETH_USD': 1.00,
   'USDT_TRX_USD': 0.998,
   'USDC_ETH_USD': 0.999,
   'USDC_SOL_USD': 0.997,
   'USDC_POL_USD': 0.996,
   'USDC_BASE_USD': 0.998,
-  
+
   'USDT_ETH_EUR': 0.92,
   'USDT_TRX_EUR': 0.918,
   'USDC_ETH_EUR': 0.919,
   'USDC_SOL_EUR': 0.917,
   'USDC_POL_EUR': 0.916,
   'USDC_BASE_EUR': 0.918,
-  
+
   'USDT_ETH_COP': 4250.00,
   'USDT_TRX_COP': 4240.00,
   'USDC_ETH_COP': 4245.00,
   'USDC_SOL_COP': 4235.00,
   'USDC_POL_COP': 4230.00,
   'USDC_BASE_COP': 4242.00,
-  
+
   'USDT_ETH_MXN': 20.15,
   'USDT_TRX_MXN': 20.10,
   'USDC_ETH_MXN': 20.12,
   'USDC_SOL_MXN': 20.08,
   'USDC_POL_MXN': 20.05,
   'USDC_BASE_MXN': 20.11,
-  
+
   // Fiat para Crypto (inverso aproximado)
   'BRL_USDT_ETH': 0.171,
   'BRL_USDT_TRX': 0.172,
@@ -51,14 +51,14 @@ const SIMULATED_RATES = {
   'BRL_USDC_SOL': 0.172,
   'BRL_USDC_POL': 0.173,
   'BRL_USDC_BASE': 0.172,
-  
+
   'USD_USDT_ETH': 1.00,
   'USD_USDT_TRX': 1.002,
   'USD_USDC_ETH': 1.001,
   'USD_USDC_SOL': 1.003,
   'USD_USDC_POL': 1.004,
   'USD_USDC_BASE': 1.002,
-  
+
   // Fiat para Fiat
   'USD_BRL': 5.85,
   'BRL_USD': 0.171,
@@ -89,38 +89,14 @@ const normalizeCurrencyCode = (code) => {
   // Mapear códigos compostos para formato de taxa
   const mapping = {
     'USDC_SOL': 'USDC_SOL',
-    'USDC_POL': 'USDC_POL', 
+    'USDC_POL': 'USDC_POL',
     'USDC_BASE': 'USDC_BASE',
     'USDC_ETH': 'USDC_ETH',
     'USDT_ETH': 'USDT_ETH',
     'USDT_TRX': 'USDT_TRX'
   }
-  
-  return mapping[code] || code
-}
 
-/**
- * Obtém a taxa simulada para um par de moedas
- */
-const getSimulatedRate = (from, to) => {
-  const normalizedFrom = normalizeCurrencyCode(from)
-  const normalizedTo = normalizeCurrencyCode(to)
-  const rateKey = `${normalizedFrom}_${normalizedTo}`
-  
-  // Tentar taxa direta
-  if (SIMULATED_RATES[rateKey]) {
-    return SIMULATED_RATES[rateKey]
-  }
-  
-  // Tentar taxa inversa
-  const inverseKey = `${normalizedTo}_${normalizedFrom}`
-  if (SIMULATED_RATES[inverseKey]) {
-    return 1 / SIMULATED_RATES[inverseKey]
-  }
-  
-  // Taxa padrão se não encontrar
-  console.warn(`Taxa não encontrada para ${from} -> ${to}, usando taxa padrão`)
-  return 1.0
+  return mapping[code] || code
 }
 
 /**
@@ -130,15 +106,9 @@ const getSimulatedRate = (from, to) => {
  * @param {string} to - Moeda de destino
  * @returns {Promise<Object>} Resposta da API com a cotação
  */
-export const getQuote = async (amount, from, to) => {
+export const getQuote = async (requestBody) => {
   try {
     const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.quote}`
-    
-    const requestBody = {
-      amount: parseFloat(amount),
-      from: from,
-      to: to
-    }
 
     console.log('Enviando requisição para:', url)
     console.log('Dados da requisição:', requestBody)
@@ -152,52 +122,20 @@ export const getQuote = async (amount, from, to) => {
       body: JSON.stringify(requestBody)
     })
 
-    const data = await response.json()
-    
+    const quote = await response.json()
+
     console.log('Status da resposta:', response.status)
-    console.log('Resposta completa da API:', data)
+    console.log('Resposta completa da API:', quote)
 
     if (!response.ok) {
-      throw new Error(`Erro na API: ${response.status} - ${data.message || 'Erro desconhecido'}`)
+      throw new Error(`Erro na API: ${response.status}`)
     }
 
-    return {
-      success: true,
-      data: data,
-      amount: data.amount || data.result || data.value,
-      rate: data.rate,
-      timestamp: data.timestamp || new Date().toISOString()
-    }
+    return quote;
 
   } catch (error) {
     console.error('Erro na requisição da API:', error)
-    
-    // Fallback com taxa simulada para demonstração
-    const simulatedRate = getSimulatedRate(from, to)
-    const simulatedAmount = (parseFloat(amount) * simulatedRate).toFixed(6)
-    
-    console.log('Usando fallback com taxa simulada:', {
-      originalAmount: amount,
-      from: from,
-      to: to,
-      rate: simulatedRate,
-      convertedAmount: simulatedAmount
-    })
-
-    return {
-      success: false,
-      error: error.message,
-      fallback: true,
-      data: {
-        amount: simulatedAmount,
-        rate: simulatedRate,
-        from: from,
-        to: to
-      },
-      amount: simulatedAmount,
-      rate: simulatedRate,
-      timestamp: new Date().toISOString()
-    }
+    throw new Error(error);
   }
 }
 
@@ -229,7 +167,7 @@ export const getSimulatedRates = () => {
 /**
  * Adiciona ou atualiza uma taxa simulada
  * @param {string} from - Moeda de origem
- * @param {string} to - Moeda de destino  
+ * @param {string} to - Moeda de destino
  * @param {number} rate - Taxa de conversão
  */
 export const updateSimulatedRate = (from, to, rate) => {
@@ -245,4 +183,3 @@ export default {
   getSimulatedRates,
   updateSimulatedRate
 }
-

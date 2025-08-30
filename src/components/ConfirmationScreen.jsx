@@ -1,12 +1,12 @@
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { CheckCircle, ArrowLeft } from 'lucide-react'
-import { getCurrencyIcon, getCurrencyDisplayName } from '../data/currencies.js'
+import { getCurrencyIcon } from '../data/currencies.js'
 
 export default function ConfirmationScreen({ transactionData, onBack }) {
   const fromIcon = getCurrencyIcon(transactionData?.fromCurrency)
   const toIcon = getCurrencyIcon(transactionData?.toCurrency)
-  
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -25,7 +25,7 @@ export default function ConfirmationScreen({ transactionData, onBack }) {
           {/* Transaction Details */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-3">
             <h3 className="font-semibold text-sm text-gray-700">Detalhes da Transação</h3>
-            
+
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Valor Enviado:</span>
               <div className="flex items-center gap-2">
@@ -40,7 +40,7 @@ export default function ConfirmationScreen({ transactionData, onBack }) {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Valor Recebido:</span>
               <div className="flex items-center gap-2">
@@ -55,12 +55,12 @@ export default function ConfirmationScreen({ transactionData, onBack }) {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Status:</span>
               <span className="text-sm font-medium text-green-600">Processando</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Data:</span>
               <span className="text-sm font-medium">
@@ -100,7 +100,7 @@ export default function ConfirmationScreen({ transactionData, onBack }) {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Nova Conversão
             </Button>
-            
+
             <Button className="w-full" variant="secondary">
               Acompanhar Status
             </Button>
@@ -110,4 +110,3 @@ export default function ConfirmationScreen({ transactionData, onBack }) {
     </div>
   )
 }
-
