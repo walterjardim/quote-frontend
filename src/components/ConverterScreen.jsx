@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
@@ -8,7 +8,7 @@ import Timer from './Timer.jsx'
 import { DEFAULT_FROM_CURRENCY, DEFAULT_TO_CURRENCY, findCurrencyByCode } from '../data/currencies.js'
 import openDoorsLogo from '../assets/opendoors.png'
 
-export default function ConverterScreen({ onSuccess }) {
+export default function ConverterScreen({ onSuccess, timer }) {
   const [sendAmount, setSendAmount] = useState('')
   const [receiveAmount, setReceiveAmount] = useState('')
   const [fromCurrency, setFromCurrency] = useState(DEFAULT_FROM_CURRENCY)
@@ -44,12 +44,15 @@ export default function ConverterScreen({ onSuccess }) {
         target: createQuoteSourceBasedBody(null, toCurrency),
       }
 
+      timer.resetTimer()
+
       const result = await getQuote(requestBody)
 
       if (result.id) {
         setReceiveAmount(result.target.amount)
         setQuoteData(result)
         setShowTimer(true)
+        timer.startTimer()
         console.log('Cotação obtida com sucesso da API')
       } else {
         throw new Error('Resposta inválida da API')
@@ -61,6 +64,8 @@ export default function ConverterScreen({ onSuccess }) {
       setIsLoading(false)
     }
   }
+
+
 
   const createQuoteSourceBasedBody = (sendAmount, currencyCode) => {
     const currency = findCurrencyByCode(currencyCode);
@@ -130,9 +135,9 @@ export default function ConverterScreen({ onSuccess }) {
         <CardHeader className="text-center">
           {/* Logo da OpenDoors */}
           <div className="flex justify-center mb-4">
-            <img 
-              src={openDoorsLogo} 
-              alt="OpenDoors Logo" 
+            <img
+              src={openDoorsLogo}
+              alt="OpenDoors Logo"
               className="logo h-10 w-auto"
             />
           </div>
@@ -154,8 +159,8 @@ export default function ConverterScreen({ onSuccess }) {
                     Cotação válida por:
                   </span>
                 </div>
-                <Timer 
-                  initialSeconds={175}
+                <Timer
+                  seconds={timer.seconds}
                   onExpire={handleTimerExpire}
                   size="default"
                   className="text-green-400"
@@ -240,14 +245,14 @@ export default function ConverterScreen({ onSuccess }) {
               </Button>
             ) : (
               <>
-                <Button 
+                <Button
                   onClick={handleProceed}
                   className="w-full btn-primary"
                   disabled={!receiveAmount || parseFloat(receiveAmount) <= 0}
                 >
                   Prosseguir para Detalhes da Cotação
                 </Button>
-                <Button 
+                <Button
                   onClick={handleNewConversion}
                   variant="outline"
                   className="w-full hover:bg-secondary"
@@ -268,4 +273,3 @@ export default function ConverterScreen({ onSuccess }) {
     </div>
   )
 }
-
