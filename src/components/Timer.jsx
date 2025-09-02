@@ -1,43 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react"
 import { Clock } from 'lucide-react'
-import { TIMER_CONFIG } from '../config/environment.js'
 
-export default function Timer({ 
-  initialSeconds = TIMER_CONFIG.duration, 
-  onExpire, 
+
+// ===================
+// Componente visual
+// ===================
+export default function Timer({
+  seconds,
+  onExpire,
   className = "",
   showIcon = true,
-  size = "default" 
+  size = "default"
 }) {
-  const [seconds, setSeconds] = useState(initialSeconds)
-  const [isActive, setIsActive] = useState(true)
-
-  useEffect(() => {
-    let interval = null
-    
-    if (isActive && seconds > 0) {
-      interval = setInterval(() => {
-        setSeconds(seconds => {
-          if (seconds <= 1) {
-            setIsActive(false)
-            if (onExpire) {
-              onExpire()
-            }
-            return 0
-          }
-          return seconds - 1
-        })
-      }, 1000)
-    } else if (seconds === 0) {
-      setIsActive(false)
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval)
-      }
-    }
-  }, [isActive, seconds, onExpire])
+  // dispara o onExpire quando zerar
+  if (seconds === 0 && onExpire) {
+    onExpire()
+  }
 
   const formatTime = (totalSeconds) => {
     const minutes = Math.floor(totalSeconds / 60)
@@ -46,7 +24,7 @@ export default function Timer({
   }
 
   const getProgressPercentage = () => {
-    return ((initialSeconds - seconds) / initialSeconds) * 100
+    return seconds > 0 ? ((175 - seconds) / 175) * 100 : 100
   }
 
   const getColorClass = () => {
@@ -79,10 +57,10 @@ export default function Timer({
         </span>
         {size === 'large' || size === 'xlarge' ? (
           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div 
+            <div
               className={`h-2 rounded-full transition-all duration-1000 ${
-                seconds <= 30 ? 'bg-red-500' : 
-                seconds <= 60 ? 'bg-orange-500' : 
+                seconds <= 30 ? 'bg-red-500' :
+                seconds <= 60 ? 'bg-orange-500' :
                 'bg-green-500'
               }`}
               style={{ width: `${100 - getProgressPercentage()}%` }}
@@ -99,7 +77,9 @@ export default function Timer({
   )
 }
 
-// Hook personalizado para usar o timer
+// ===================
+// Hook useTimer
+// ===================
 export function useTimer(initialSeconds = 175) {
   const [seconds, setSeconds] = useState(initialSeconds)
   const [isActive, setIsActive] = useState(false)
@@ -107,24 +87,22 @@ export function useTimer(initialSeconds = 175) {
 
   useEffect(() => {
     let interval = null
-    
+
     if (isActive && seconds > 0) {
       interval = setInterval(() => {
-        setSeconds(seconds => {
-          if (seconds <= 1) {
+        setSeconds((prev) => {
+          if (prev <= 1) {
             setIsActive(false)
             setIsExpired(true)
             return 0
           }
-          return seconds - 1
+          return prev - 1
         })
       }, 1000)
     }
 
     return () => {
-      if (interval) {
-        clearInterval(interval)
-      }
+      if (interval) clearInterval(interval)
     }
   }, [isActive, seconds])
 
@@ -146,7 +124,9 @@ export function useTimer(initialSeconds = 175) {
   const formatTime = (totalSeconds) => {
     const minutes = Math.floor(totalSeconds / 60)
     const remainingSeconds = totalSeconds % 60
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`
   }
 
   return {
@@ -156,7 +136,6 @@ export function useTimer(initialSeconds = 175) {
     formattedTime: formatTime(seconds),
     startTimer,
     stopTimer,
-    resetTimer
+    resetTimer,
   }
 }
-

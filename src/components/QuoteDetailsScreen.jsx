@@ -6,8 +6,9 @@ import Timer from './Timer.jsx'
 import { findCurrencyByCode } from '../data/currencies.js'
 import { WALLET_CONFIG, APP_CONFIG } from '../config/environment.js'
 import openDoorsLogo from '../assets/opendoors.png'
+import qrCode from '../assets/qr-code.png'
 
-export default function QuoteDetailsScreen({ transactionData, onBack }) {
+export default function QuoteDetailsScreen({ transactionData, onBack, timer }) {
   const [copied, setCopied] = useState(false)
   const [currentStep, setCurrentStep] = useState(2)
 
@@ -85,7 +86,7 @@ export default function QuoteDetailsScreen({ transactionData, onBack }) {
             />
           </div>
           <Timer
-            initialSeconds={175}
+            seconds={timer.seconds}
             size="large"
             className="text-primary"
           />
@@ -133,10 +134,11 @@ export default function QuoteDetailsScreen({ transactionData, onBack }) {
               <div className="flex justify-center">
                 <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center border-4 border-primary/20">
                   <div className="text-center">
-                    <div className="w-32 h-32 bg-black/10 rounded-lg mb-2 flex items-center justify-center">
-                      <span className="text-4xl">₮</span>
-                    </div>
-                    <p className="text-xs text-black/60">QR Code</p>
+                      <img
+                        src={qrCode}
+                        alt="QR Code"
+                      />
+                    
                   </div>
                 </div>
               </div>
