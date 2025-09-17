@@ -111,8 +111,6 @@ export const getQuote = async (requestBody) => {
   try {
     const url = `${API_SETTINGS.baseUrl}${API_SETTINGS.endpoints.quote}`
 
-    console.log('url = ', url);
-
     debugLog('Enviando requisição para:', url)
     debugLog('Dados da requisição:', requestBody)
 
@@ -191,8 +189,94 @@ export const updateSimulatedRate = (from, to, rate) => {
   debugLog(`Taxa simulada atualizada: ${rateKey} = ${rate}`)
 }
 
+/**
+ * Faz upload de documento para a API
+ * @param {Object} documentData - Dados do documento
+ * @param {string} documentData.scope - Escopo do documento
+ * @param {string} documentData.type - Tipo do documento
+ * @param {string} documentData.purpose - Propósito do documento
+ * @param {File} documentData.file - Arquivo a ser enviado
+ * @returns {Promise<Object>} Resposta da API com o ID do documento
+ */
+export const uploadDocument = async (documentData) => {
+  try {
+    const url = `${API_SETTINGS.baseUrl}/documents`
+
+    debugLog('Enviando documento para:', url)
+    debugLog('Dados do documento:', {
+      scope: documentData.scope,
+      type: documentData.type,
+      purpose: documentData.purpose,
+      fileName: documentData.file?.name,
+      fileSize: documentData.file?.size
+    })
+
+    // Criar FormData para multipart/form-data
+    const formData = new FormData()
+    formData.append('scope', documentData.scope)
+    formData.append('type', documentData.type)
+    formData.append('purpose', documentData.purpose)
+    formData.append('file', documentData.file)
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), API_SETTINGS.timeout)
+
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData, // Não definir Content-Type, o browser define automaticamente para multipart/form-data
+      signal: controller.signal
+    })
+
+    clearTimeout(timeoutId)
+
+    debugLog('Status da resposta:', response.status)
+
+    if (!response.ok) {
+      throw new Error(`Erro na API: ${response.status} - ${response.statusText}`)
+    }
+
+    const result = await response.json()
+    debugLog('Resposta completa da API:', result)
+
+    return {
+      success: true,
+      data: result
+    }
+
+  } catch (error) {
+    errorLog('Erro no upload do documento:', error)
+
+    // Se o fallback estiver habilitado, simular resposta
+    if (FALLBACK_CONFIG.enabled) {
+      warnLog('API indisponível, usando fallback para upload de documento')
+
+      // Simular um ID de documento
+      const simulatedId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+      return {
+        success: true,
+        data: {
+          id: simulatedId,
+          scope: documentData.scope,
+          type: documentData.type,
+          purpose: documentData.purpose,
+          fileName: documentData.file?.name,
+          uploadedAt: new Date().toISOString(),
+          status: 'uploaded'
+        }
+      }
+    }
+
+    return {
+      success: false,
+      error: error.message || 'Erro ao fazer upload do documento'
+    }
+  }
+}
+
 export default {
   getQuote,
+  uploadDocument,
   updateApiConfig,
   getApiConfig,
   getSimulatedRates,

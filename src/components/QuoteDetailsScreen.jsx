@@ -130,24 +130,11 @@ export default function QuoteDetailsScreen({ transactionData, onBack, timer }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* QR Code Placeholder */}
-              <div className="flex justify-center">
-                <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center border-4 border-primary/20">
-                  <div className="text-center">
-                      <img
-                        src={qrCode}
-                        alt="QR Code"
-                      />
-                    
-                  </div>
-                </div>
-              </div>
-
               {/* Wallet Address */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">
-                    PARA A CARTEIRA ABAIXO
+                    ENDEREÇO DA CARTEIRA
                   </span>
                   <Eye className="w-4 h-4 text-muted-foreground" />
                 </div>
