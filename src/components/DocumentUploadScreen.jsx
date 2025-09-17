@@ -78,11 +78,7 @@ export default function DocumentUploadScreen({ onSuccess }) {
     try {
       debugLog('Enviando documento:', formData)
 
-      // const result = await uploadDocument(formData)
-      const result = {
-        success: true,
-        data: { id: "ID_blablabla" }
-      }
+      const result = await uploadDocument(formData)
 
       if (result.success) {
         setDocumentId(result.data.id)
