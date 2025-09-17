@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
-import { ArrowUpDown, AlertCircle } from 'lucide-react'
+import { ArrowUpDown, AlertCircle, FileText, ArrowLeft } from 'lucide-react'
 import CurrencySelector from './CurrencySelector.jsx'
 import Timer from './Timer.jsx'
 import { DEFAULT_FROM_CURRENCY, DEFAULT_TO_CURRENCY, findCurrencyByCode } from '../data/currencies.js'
 import openDoorsLogo from '../assets/opendoors.png'
 
-export default function ConverterScreen({ onSuccess, timer }) {
+export default function ConverterScreen({ documentId, onSuccess, onBack, timer }) {
   const [sendAmount, setSendAmount] = useState('')
   const [receiveAmount, setReceiveAmount] = useState('')
   const [fromCurrency, setFromCurrency] = useState(DEFAULT_FROM_CURRENCY)
@@ -64,8 +64,6 @@ export default function ConverterScreen({ onSuccess, timer }) {
       setIsLoading(false)
     }
   }
-
-
 
   const createQuoteSourceBasedBody = (sendAmount, currencyCode) => {
     const currency = findCurrencyByCode(currencyCode);
@@ -133,6 +131,21 @@ export default function ConverterScreen({ onSuccess, timer }) {
     <div className="min-h-screen flex items-center justify-center p-4 fade-in">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          {/* Botão Voltar */}
+          {onBack && (
+            <div className="flex justify-start mb-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onBack}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </div>
+          )}
+
           {/* Logo da OpenDoors */}
           <div className="flex justify-center mb-4">
             <img
@@ -147,6 +160,19 @@ export default function ConverterScreen({ onSuccess, timer }) {
           <p className="text-sm text-muted-foreground mt-2">
             Converta seus <span className="text-accent">criptoativos</span> de forma segura
           </p>
+
+          {/* Informação do Documento */}
+          {documentId && (
+            <div className="mt-4 p-3 bg-secondary/30 rounded-lg border border-border">
+              <div className="flex items-center justify-center space-x-2">
+                <FileText className="h-4 w-4 text-primary" />
+                <span className="text-sm text-muted-foreground">Documento:</span>
+                <span className="text-sm font-mono font-semibold text-foreground">
+                  {documentId}
+                </span>
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Timer Section - Aparece após conversão bem-sucedida */}
